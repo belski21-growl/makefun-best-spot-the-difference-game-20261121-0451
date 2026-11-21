@@ -1,0 +1,89 @@
+/* Lantern Harbor — Spot the Difference: every colour and layout rule lives here. */
+* { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; background: #101623; }
+body {
+  font-family: "Trebuchet MS", "Segoe UI", Verdana, sans-serif;
+  color: #f3ead8;
+  min-height: 100vh;
+}
+#app { width: 1280px; margin: 0 auto; padding: 10px 20px 8px; }
+#hud {
+  display: flex; align-items: center; justify-content: space-between; gap: 16px;
+  padding: 6px 4px 10px;
+}
+.hud-left h1 {
+  margin: 0; font-size: 30px; letter-spacing: 1px; color: #ffd97a;
+  text-shadow: 0 2px 0 #7a4d12, 0 0 18px rgba(255, 190, 80, .45);
+}
+.hud-left .subtitle { margin: 2px 0 0; font-size: 13px; color: #b9c6de; }
+.hud-mid { text-align: center; }
+.counter {
+  font-size: 26px; font-weight: bold; color: #ffffff;
+  background: #1d2f52; border: 2px solid #ffd97a; border-radius: 12px;
+  padding: 4px 18px; display: inline-block;
+}
+.dots { margin-top: 6px; display: flex; gap: 6px; justify-content: center; }
+.dots .dot {
+  width: 14px; height: 14px; border-radius: 50%;
+  border: 2px solid #ffd97a; background: transparent;
+}
+.dots .dot.found { background: #7ee081; border-color: #7ee081; }
+.hud-right { display: flex; align-items: center; gap: 10px; }
+.timer-wrap {
+  position: relative; width: 150px; height: 30px; border-radius: 8px;
+  background: #0b1220; border: 2px solid #5b6b8c; overflow: hidden;
+}
+#timerBar {
+  position: absolute; inset: 0; width: 100%;
+  background: linear-gradient(90deg, #37b6ff, #7ee081);
+  transform-origin: left center;
+}
+#timerText {
+  position: relative; z-index: 1; display: block; text-align: center;
+  line-height: 28px; font-weight: bold; font-size: 15px; color: #fff;
+  text-shadow: 0 1px 2px #000;
+}
+#timerText.urgent { color: #ff8a7a; animation: timerPulse 1s infinite; }
+@keyframes timerPulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.14); }
+}
+.score { font-size: 15px; color: #b9c6de; }
+.score strong { font-size: 20px; color: #ffd97a; }
+button {
+  font-family: inherit; font-size: 14px; font-weight: bold; color: #101623;
+  background: #ffd97a; border: none; border-radius: 8px; padding: 8px 12px;
+  cursor: pointer;
+}
+button:hover { background: #ffe6a3; }
+button:disabled { opacity: .45; cursor: default; }
+#soundBtn { background: #b9c6de; }
+#stage { position: relative; }
+.panel-label {
+  position: absolute; top: -2px; font-size: 12px; font-weight: bold;
+  letter-spacing: 2px; color: #b9c6de; z-index: 2;
+}
+.panel-label.left { left: 8px; }
+.panel-label.right { right: 8px; }
+#game {
+  display: block; width: 1240px; height: 560px;
+  background: #1a2340; border-radius: 14px; cursor: crosshair;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, .5);
+}
+#banner {
+  position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%);
+  min-width: 420px; max-width: 640px; text-align: center;
+  background: rgba(13, 20, 38, .94); border: 3px solid #ffd97a; border-radius: 16px;
+  padding: 22px 28px; z-index: 3; box-shadow: 0 12px 40px rgba(0, 0, 0, .6);
+}
+#banner.hidden { display: none; }
+#banner h2 { margin: 0 0 8px; font-size: 30px; color: #ffd97a; }
+#banner p { margin: 6px 0; font-size: 16px; line-height: 1.45; }
+#banner .big { font-size: 20px; font-weight: bold; color: #7ee081; }
+#banner button { margin-top: 12px; font-size: 16px; padding: 10px 20px; }
+#help {
+  display: flex; justify-content: space-between; gap: 12px;
+  padding: 8px 4px 0; font-size: 13px; color: #8fa0bd;
+}
+#help b { color: #ffd97a; }
+#status { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
