@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Lantern Harbor — Spot the Difference</title>
-<link rel="stylesheet" href="./styles.css">
+<link href="./styles.css" rel="stylesheet">
 </head>
 <body>
 <div id="app">
@@ -14,7 +14,9 @@
       <p class="subtitle">Spot the Difference &middot; <span id="levelName">Level 1 &mdash; Dusk Harbor</span></p>
     </div>
     <div class="hud-mid">
-      <div class="counter" id="foundCounter" aria-live="polite"><span id="toFindText">7 to find</span><span id="foundSmall">Found 0 / 7</span></div>
+      <div class="counter" id="foundCounter" aria-live="polite">
+        <span id="toFindText">7 to find</span><span id="foundSmall">Found 0 / 7</span>
+      </div>
       <div class="dots" id="foundDots" aria-hidden="true"></div>
       <div class="streak-pill hidden" id="streakPill" aria-live="polite"></div>
     </div>
@@ -26,8 +28,8 @@
       <span class="par-label">Par 2:00</span>
       <div class="score">Score <strong id="scoreText">0</strong></div>
       <span class="misses" id="missesText">Misses: 0</span>
-      <button id="hintBtn" type="button" title="Hint (H) — reveals one difference, costs 50 points">Hint (H) &middot; 3 left</button>
-      <button id="soundBtn" type="button" title="Sound on/off (M)">Sound: On</button>
+      <button type="button" id="hintBtn" title="Hint (H) — reveals one difference, costs 50 points">Hint (H) &middot; 3 left</button>
+      <button type="button" id="soundBtn" title="Sound on/off (M)">Sound: On</button>
     </div>
   </header>
   <main id="stage">

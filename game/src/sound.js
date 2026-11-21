@@ -1,64 +1,64 @@
-// Lantern Harbor — all sound is synthesised with WebAudio: no audio files.
+// Lantern Harbor — every sound is synthesised with WebAudio: no audio files.
 // A bright chime on a find, a low buzz on a miss, a little arpeggio on a win.
-export function createSound() {
-  let context = null;
-  let muted = false;
+export function makeSoundBank() {
+  let ctx = null;
+  let silent = false;
 
-  function ensure() {
-    if (context === null) {
-      const AudioContext = window.AudioContext || window.webkitAudioContext;
-      if (!AudioContext) return null;
-      context = new AudioContext();
+  function audioContext() {
+    if (ctx === null) {
+      const AC = window.AudioContext || window.webkitAudioContext;
+      if (!AC) return null;
+      ctx = new AC();
     }
-    if (context.state === 'suspended') context.resume();
-    return context;
+    if (ctx.state === 'suspended') ctx.resume();
+    return ctx;
   }
 
-  function tone(freq, start, length, type, volume) {
-    if (muted) return;
-    const ac = ensure();
+  function blip(freq, delay, length, type, volume) {
+    if (silent) return;
+    const ac = audioContext();
     if (!ac) return;
     const osc = ac.createOscillator();
     const gain = ac.createGain();
     osc.type = type;
     osc.frequency.value = freq;
-    gain.gain.setValueAtTime(volume, ac.currentTime + start);
-    gain.gain.exponentialRampToValueAtTime(0.001, ac.currentTime + start + length);
+    gain.gain.setValueAtTime(volume, ac.currentTime + delay);
+    gain.gain.exponentialRampToValueAtTime(0.001, ac.currentTime + delay + length);
     osc.connect(gain);
     gain.connect(ac.destination);
-    osc.start(ac.currentTime + start);
-    osc.stop(ac.currentTime + start + length);
+    osc.start(ac.currentTime + delay);
+    osc.stop(ac.currentTime + delay + length);
+  }
+
+  function arpeggio(notes) {
+    notes.forEach(([freq, delay, length, type, volume]) => blip(freq, delay, length, type, volume));
   }
 
   return {
     found() {
-      tone(660, 0, 0.14, 'sine', 0.22);
-      tone(990, 0.09, 0.2, 'sine', 0.2);
+      arpeggio([[660, 0, 0.14, 'sine', 0.22], [990, 0.09, 0.2, 'sine', 0.2]]);
     },
     miss() {
-      tone(160, 0, 0.22, 'sawtooth', 0.12);
+      blip(160, 0, 0.22, 'sawtooth', 0.12);
     },
     hint() {
-      tone(520, 0, 0.12, 'triangle', 0.16);
-      tone(780, 0.08, 0.14, 'triangle', 0.14);
+      arpeggio([[520, 0, 0.12, 'triangle', 0.16], [780, 0.08, 0.14, 'triangle', 0.14]]);
     },
     tick() {
-      tone(1200, 0, 0.05, 'square', 0.08);
+      blip(1200, 0, 0.05, 'square', 0.08);
     },
     levelDone() {
-      tone(523, 0, 0.16, 'sine', 0.2);
-      tone(659, 0.12, 0.16, 'sine', 0.2);
-      tone(784, 0.24, 0.3, 'sine', 0.22);
+      arpeggio([[523, 0, 0.16, 'sine', 0.2], [659, 0.12, 0.16, 'sine', 0.2], [784, 0.24, 0.3, 'sine', 0.22]]);
     },
     win() {
-      [523, 659, 784, 1047].forEach((f, i) => tone(f, i * 0.13, 0.3, 'sine', 0.2));
+      [523, 659, 784, 1047].forEach((f, i) => blip(f, i * 0.13, 0.3, 'sine', 0.2));
     },
     toggleMuted() {
-      muted = !muted;
-      return muted;
+      silent = !silent;
+      return silent;
     },
     isMuted() {
-      return muted;
+      return silent;
     },
   };
 }
