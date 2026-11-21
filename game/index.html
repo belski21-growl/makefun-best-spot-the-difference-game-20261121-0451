@@ -14,15 +14,18 @@
       <p class="subtitle">Spot the Difference &middot; <span id="levelName">Level 1 &mdash; Dusk Harbor</span></p>
     </div>
     <div class="hud-mid">
-      <div class="counter" id="foundCounter" aria-live="polite">Found 0 / 7</div>
+      <div class="counter" id="foundCounter" aria-live="polite"><span id="toFindText">7 to find</span><span id="foundSmall">Found 0 / 7</span></div>
       <div class="dots" id="foundDots" aria-hidden="true"></div>
+      <div class="streak-pill hidden" id="streakPill" aria-live="polite"></div>
     </div>
     <div class="hud-right">
       <div class="timer-wrap">
         <div id="timerBar"></div>
-        <span id="timerText">3:00</span>
+        <span id="timerText">2:00</span>
       </div>
+      <span class="par-label">Par 2:00</span>
       <div class="score">Score <strong id="scoreText">0</strong></div>
+      <span class="misses" id="missesText">Misses: 0</span>
       <button id="hintBtn" type="button" title="Hint (H) — reveals one difference, costs 50 points">Hint (H) &middot; 3 left</button>
       <button id="soundBtn" type="button" title="Sound on/off (M)">Sound: On</button>
     </div>
@@ -31,8 +34,16 @@
     <div class="panel-label left">LEFT &mdash; the original</div>
     <div class="panel-label right">RIGHT &mdash; find 7 changes</div>
     <canvas id="game" width="1240" height="560" aria-label="Spot the difference: two near-identical harbor scenes side by side. Click a difference on either picture to mark it."></canvas>
+    <div id="foundStrip" class="empty" aria-live="polite">Nothing found yet — look for 7 differences!</div>
     <div id="banner" class="hidden"></div>
   </main>
+  <div id="sceneBar">
+    <span class="scene-label">Play a scene:</span>
+    <button type="button" data-level="0">1 &middot; Dusk Harbor</button>
+    <button type="button" data-level="1">2 &middot; Mossy Garden</button>
+    <button type="button" data-level="2">3 &middot; Night Market</button>
+    <span class="howto">How to play: click a difference on either picture — 7 per scene, 2:00 on the clock.</span>
+  </div>
   <footer id="help">
     <span>Click a difference on either picture to circle it.</span>
     <span>Wrong click: &minus;25 points.</span>

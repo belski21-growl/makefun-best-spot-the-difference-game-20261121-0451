@@ -7,8 +7,13 @@ import { SCENES } from './scenes.js';
 function markFound(game, levelIndex, ids, score, secondsLeft) {
   game.levelIndex = levelIndex;
   game.found = new Set(ids);
+  // Staged finds happened in a row, so the streak pill shows the combo.
+  game.streak = ids.length;
   game.score = score;
   game.timeLeft = secondsLeft;
+  // Freeze the clock on staged frames: the timer text and bar must be
+  // identical in every capture of the same shot.
+  game.freezeTimer = true;
   game.screen = 'play';
   game.hintsLeft = 3;
   game.hintId = null;
@@ -18,15 +23,18 @@ function markFound(game, levelIndex, ids, score, secondsLeft) {
 /** Stage `name` on `game` (start, play, level2 or win) and return the screen. */
 export function stageShot(name, game, ui) {
   if (name === 'play') {
-    // Mid-hunt on the harbour: 3 found and circled, 4 still to find.
-    markFound(game, 0, ['beam', 'sail', 'lamp'], 350, 142);
+    // Mid-hunt in the garden (the densest scene): 3 found and circled, 4
+    // still to find. All three rings circle a visible object in both panels
+    // (butterfly + sunflower are colour changes; the mushroom ring is dashed
+    // with a − badge on the panel where the mushroom is missing).
+    markFound(game, 1, ['butterfly', 'sunflower', 'mushrooms'], 375, 96);
     ui.banner.innerHTML = '';
     ui.banner.classList.add('hidden');
     return 'play';
   }
   if (name === 'level2') {
-    // Mid-hunt in the garden: 2 found, 5 still to find, clock ticking.
-    markFound(game, 1, ['butterfly', 'frog'], 520, 118);
+    // Mid-hunt in the night market: 2 found, 5 still to find, clock ticking.
+    markFound(game, 2, ['lantern', 'moon'], 225, 84);
     ui.banner.innerHTML = '';
     ui.banner.classList.add('hidden');
     return 'play';
@@ -50,12 +58,14 @@ export function stageShot(name, game, ui) {
   game.levelIndex = 0;
   game.found = new Set();
   game.score = 0;
-  game.timeLeft = 180;
+  game.streak = 0;
+  game.timeLeft = 120;
+  game.freezeTimer = false;
   game.screen = 'title';
   ui.banner.innerHTML =
     `<h2>Lantern Harbor</h2>` +
     `<p>Two pictures of the same place — but 7 things changed between them.</p>` +
-    `<p>Find all 7 on each of the 3 scenes before the 3:00 timer runs out.</p>` +
+    `<p>Find all 7 on each of the 3 scenes before the 2:00 timer runs out.</p>` +
     `<p>Click a difference on either picture. Hints cost 50 points, wrong clicks cost 25 — and finds in a row build a combo bonus up to +100.</p>` +
     `<button type="button">Start hunting</button>`;
   ui.banner.classList.remove('hidden');

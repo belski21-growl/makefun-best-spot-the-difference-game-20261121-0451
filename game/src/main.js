@@ -10,7 +10,12 @@ const shot = params.get('shot');
 const ui = {
   levelName: document.getElementById('levelName'),
   foundCounter: document.getElementById('foundCounter'),
+  toFindText: document.getElementById('toFindText'),
+  foundSmall: document.getElementById('foundSmall'),
+  streakPill: document.getElementById('streakPill'),
+  missesText: document.getElementById('missesText'),
   foundDots: document.getElementById('foundDots'),
+  foundStrip: document.getElementById('foundStrip'),
   timerBar: document.getElementById('timerBar'),
   timerText: document.getElementById('timerText'),
   scoreText: document.getElementById('scoreText'),

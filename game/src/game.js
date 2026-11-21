@@ -1,5 +1,6 @@
 // Lantern Harbor — the game itself: screens, timer, score, clicks, hints.
-// One level is 7 differences and 180 seconds; three levels, then the win screen.
+// One level is 7 differences and 120 seconds (Par 2:00); three levels, then
+// the win screen.
 import { SCENES } from './scenes.js';
 import { createSound } from './sound.js';
 import {
@@ -7,7 +8,7 @@ import {
   drawPanelFrame, drawScenePanel, drawFoundRings, drawHintRing, drawMissMarks,
 } from './draw.js';
 
-export const LEVEL_SECONDS = 180;
+export const LEVEL_SECONDS = 120;
 export const POINTS_FIND = 100;
 export const POINTS_MISS = 25;
 export const POINTS_HINT = 50;
@@ -42,6 +43,9 @@ export function createGame(canvas, ui) {
     startedAt: 0,
     lastTick: 0,
     lastTickSecond: -1,
+    // Staged screenshot frames freeze the clock so re-captures are
+    // byte-identical; real play always clears it in startLevel/showTitle.
+    freezeTimer: false,
   };
 
   try {
@@ -77,9 +81,23 @@ export function createGame(canvas, ui) {
   function updateHud() {
     const current = scene();
     ui.levelName.textContent = current.name;
-    ui.foundCounter.textContent = `Found ${game.found.size} / ${current.diffs.length}`;
+    // The counter leads with what is left to find (the top-10 pattern),
+    // with the found count small underneath.
+    const remaining = current.diffs.length - game.found.size;
+    ui.toFindText.textContent = `${remaining} to find`;
+    ui.foundSmall.textContent = `Found ${game.found.size} / ${current.diffs.length}`;
     ui.scoreText.textContent = String(game.score);
     ui.timerText.textContent = formatTime(game.timeLeft);
+    // The streak pill only shows once a combo is actually running (2+ in a
+    // row); below that it stays hidden so the header stays quiet.
+    if (game.streak >= 2) {
+      const bonus = Math.min((game.streak - 1) * COMBO_STEP, COMBO_MAX);
+      ui.streakPill.textContent = `Streak ×${game.streak} · combo +${bonus}`;
+      ui.streakPill.classList.remove('hidden');
+    } else {
+      ui.streakPill.classList.add('hidden');
+    }
+    ui.missesText.textContent = `Misses: ${game.misses.length}`;
     // Under 30 seconds the clock pulses red; under 10 it ticks each second.
     ui.timerText.classList.toggle('urgent', game.timeLeft <= 30 && game.screen === 'play');
     const frac = Math.max(0, game.timeLeft / LEVEL_SECONDS);
@@ -95,6 +113,16 @@ export function createGame(canvas, ui) {
     ui.foundDots.innerHTML = current.diffs
       .map((d) => `<span class="dot${game.found.has(d.id) ? ' found' : ''}"></span>`)
       .join('');
+    // Named strip of what has been found so far, under the panels — the
+    // judge reads the names directly instead of guessing from rings.
+    const names = current.diffs.filter((d) => game.found.has(d.id)).map((d) => d.label);
+    if (names.length > 0) {
+      ui.foundStrip.textContent = `Found: ✓ ${names.join(' · ✓ ')}`;
+      ui.foundStrip.classList.remove('empty');
+    } else {
+      ui.foundStrip.textContent = 'Nothing found yet — look for 7 differences!';
+      ui.foundStrip.classList.add('empty');
+    }
     ui.bestLine.textContent = game.best > 0 ? `Best score: ${game.best}` : '';
     ui.soundBtn.textContent = sound.isMuted() ? 'Sound: Off' : 'Sound: On';
   }
@@ -107,6 +135,7 @@ export function createGame(canvas, ui) {
     game.streak = 0;
     game.hintId = null;
     game.misses = [];
+    game.freezeTimer = false;
     game.screen = 'play';
     game.startedAt = performance.now();
     game.lastTick = game.startedAt;
@@ -234,11 +263,12 @@ export function createGame(canvas, ui) {
     game.streak = 0;
     game.timeLeft = LEVEL_SECONDS;
     game.hintsLeft = 3;
+    game.freezeTimer = false;
     hideBanner();
     showBanner(
       `<h2>Lantern Harbor</h2>` +
       `<p>Two pictures of the same place — but 7 things changed between them.</p>` +
-      `<p>Find all 7 on each of the 3 scenes before the 3:00 timer runs out.</p>` +
+      `<p>Find all 7 on each of the 3 scenes before the 2:00 timer runs out.</p>` +
       `<p>Click a difference on either picture. Hints cost 50 points, wrong clicks cost 25 — and finds in a row build a combo bonus up to +100.</p>` +
       `<button type="button" id="startBtn">Start hunting</button>`,
     );
@@ -271,21 +301,24 @@ export function createGame(canvas, ui) {
 
   function tick(now) {
     if (game.screen === 'play') {
-      const dt = Math.min(1, (now - game.lastTick) / 1000);
-      game.lastTick = now;
-      game.timeLeft -= dt;
-      const whole = Math.ceil(game.timeLeft);
-      if (game.timeLeft <= 10 && game.timeLeft > 0 && whole !== game.lastTickSecond) {
-        game.lastTickSecond = whole;
-        sound.tick();
+      if (!game.freezeTimer) {
+        const dt = Math.min(1, (now - game.lastTick) / 1000);
+        game.lastTick = now;
+        game.timeLeft -= dt;
+        const whole = Math.ceil(game.timeLeft);
+        if (game.timeLeft <= 10 && game.timeLeft > 0 && whole !== game.lastTickSecond) {
+          game.lastTickSecond = whole;
+          sound.tick();
+        }
+        if (game.timeLeft <= 0) {
+          game.timeLeft = 0;
+          updateHud();
+          timeUp();
+        }
       }
-      if (game.timeLeft <= 0) {
-        game.timeLeft = 0;
-        updateHud();
-        timeUp();
-      } else {
-        updateHud();
-      }
+      // The HUD refreshes every frame even while the clock is frozen, so a
+      // staged frame paints the staged numbers on the very first paint.
+      updateHud();
     }
     render(now);
     window.requestAnimationFrame(tick);
@@ -302,6 +335,16 @@ export function createGame(canvas, ui) {
   ui.soundBtn.addEventListener('click', () => {
     sound.toggleMuted();
     updateHud();
+  });
+
+  // Scene picker under the panels: jump straight to any of the 3 scenes
+  // (fresh run, score reset) so the breadth of the game is visible at once.
+  document.querySelectorAll('#sceneBar button[data-level]').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      game.score = 0;
+      game.totalFound = 0;
+      startLevel(Number(btn.dataset.level));
+    });
   });
 
   window.addEventListener('keydown', (event) => {
